@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molding Trouble Report - Moriroku Technology</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; }
+        
+        /* Glass Panel */
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); transition: background-color 0.3s, border-color 0.3s; }
+        
+        /* --- NIGHT MODE / DARK MODE OVERRIDES --- */
+        html.dark body { background-color: #0f172a; color: #f1f5f9; }
+        html.dark .glass-panel { background: rgba(30, 41, 59, 0.95); border-color: #334155; }
+        html.dark #app-header, html.dark .bg-white { background-color: #1e293b !important; border-color: #334155 !important; }
+        html.dark #view-login { background-color: #0f172a !important; }
+        html.dark .bg-slate-50 { background-color: #0f172a !important; }
+        html.dark .bg-slate-100 { background-color: #334155 !important; }
+        html.dark .bg-slate-200\/50 { background-color: rgba(51, 65, 85, 0.5) !important; }
+        html.dark input, html.dark select, html.dark textarea { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        
+        /* Text Colors */
+        html.dark .text-slate-800, html.dark .text-slate-700 { color: #f8fafc !important; }
+        html.dark .text-slate-600, html.dark .text-slate-500 { color: #94a3b8 !important; }
+        html.dark .text-indigo-600, html.dark .text-indigo-700 { color: #818cf8 !important; }
+        
+        /* Icon Backgrounds in Cards */
+        html.dark .bg-indigo-50 { background-color: rgba(79, 70, 229, 0.15) !important; }
+        html.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.15) !important; }
+        html.dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.15) !important; }
+        
+        /* Borders & Tables */
+        html.dark .border-slate-200, html.dark .border-slate-100 { border-color: #334155 !important; }
+        html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]), html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
+        html.dark tr.hover\:bg-slate-50:hover { background-color: #334155 !important; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-100">
+
+    <!-- Login View -->
+    <div id="view-login" class="fixed inset-0 z-50 bg-slate-50 flex items-center justify-center p-4">
+        <div class="glass-panel max-w-md w-full p-8 rounded-2xl shadow-xl border border-slate-200 fade-in">
+            <div class="text-center mb-8">
+                <div class="bg-gradient-to-br from-indigo-600 to-blue-500 p-3 rounded-xl shadow-md inline-block mb-4">
+                    <i data-lucide="lock" class="text-white w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-blue-600 leading-tight">
+                    MOLDING TROUBLE REPORT
+                </h2>
+                <p class="text-xs font-bold text-indigo-600 tracking-wider mt-1">MORIROKU TECHNOLOGY INDONESIA</p>
+            </div>
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Username</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-3 top-2.5 w-5 h-5 text-slate-400"></i>
+                        <input type="text" id="login-user" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2.5 pl-10 pr-3 border text-sm" placeholder="Masukkan username (hint: moldmaintenance)">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                    <div class="relative">
+                        <i data-lucide="key" class="absolute left-3 top-2.5 w-5 h-5 text-slate-400"></i>
+                        <input type="password" id="login-pass" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2.5 pl-10 pr-3 border text-sm" placeholder="Masukkan password (hint: moldmtc)">
+                    </div>
+                </div>
+                <div id="login-error" class="hidden text-rose-500 text-xs font-bold text-center bg-rose-50 py-2 rounded-lg border border-rose-100">
+                    Username atau Password salah!
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md shadow-indigo-200 flex justify-center items-center">
+                    <i data-lucide="log-in" class="w-5 h-5 mr-2"></i> Masuk Sistem
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center transform transition-transform duration-300 translate-x-full opacity-0">
+        <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-emerald-400"></i>
+        <span id="toast-msg" class="text-sm font-medium">Notifikasi</span>
+    </div>
+
+    <!-- Header -->
+    <header id="app-header" class="hidden bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-gradient-to-br from-indigo-600 to-blue-500 p-2.5 rounded-xl shadow-md">
+                        <i data-lucide="settings" class="text-white w-7 h-7 animate-[spin_4s_linear_infinite]"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-blue-600 leading-tight">
+                            MOLDING TROUBLE REPORT
+                        </h1>
+                        <p class="text-xs font-bold text-indigo-600 tracking-wider">MORIROKU TECHNOLOGY INDONESIA</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleTheme()" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-slate-100 rounded-lg transition-colors" title="Night Mode">
+                        <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
+                    </button>
+                    <div class="relative">
+                        <select id="lang-selector" onchange="applyLanguage(this.value)" class="appearance-none bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold py-1.5 pl-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="id">🇮🇩 ID</option>
+                            <option value="en">🇬🇧 EN</option>
+                            <option value="jp">🇯🇵 JP</option>
+                        </select>
+                        <i data-lucide="globe" class="absolute right-2.5 top-1.5 w-3.5 h-3.5 text-slate-500 pointer-events-none"></i>
+                    </div>
+                    <button onclick="logout()" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors ml-1" title="Logout">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="app-main" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Tab Navigation -->
+        <div class="flex space-x-1 mb-8 bg-slate-200/50 p-1 rounded-xl w-fit">
+            <button id="tab-dashboard" onclick="switchTab('dashboard')" class="flex items-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all bg-white shadow-sm text-indigo-600">
+                <i data-lucide="activity" class="w-4 h-4 mr-2"></i> <span data-i18n="navDashboard">Dashboard</span>
+            </button>
+            <button id="tab-record" onclick="switchTab('record')" class="flex items-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/50">
+                <i data-lucide="plus-square" class="w-4 h-4 mr-2"></i> <span data-i18n="navInput">Input Record</span>
+            </button>
+            <button id="tab-history" onclick="switchTab('history')" class="flex items-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/50">
+                <i data-lucide="database" class="w-4 h-4 mr-2"></i> <span data-i18n="navHistory">History List</span>
+            </button>
+        </div>
+
+        <!-- VIEW: DASHBOARD -->
+        <div id="view-dashboard" class="fade-in space-y-6">
+            
+            <!-- Dashboard Header & Advanced Filter -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between bg-white p-5 rounded-2xl shadow-sm border border-slate-200 gap-4">
+                <div class="flex items-center">
+                    <div class="bg-indigo-50 p-2 rounded-lg mr-3 text-indigo-600"><i data-lucide="bar-chart-2" class="w-6 h-6"></i></div>
+                    <h2 class="text-xl font-bold text-slate-800" data-i18n="dashTitle">Dashboard Performance</h2>
+                </div>
+                
+                <div class="flex flex-wrap items-center space-x-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                    <label class="text-sm font-bold text-slate-600 whitespace-nowrap" data-i18n="filterPeriod">Periode Filter:</label>
+                    
+                    <select id="filter-mode" onchange="toggleFilterMode()" class="rounded-lg border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1.5 px-3 text-sm font-semibold text-slate-700 bg-white cursor-pointer">
+                        <option value="all">Semua Waktu</option>
+                        <option value="month" selected>Per Bulan</option>
+                        <option value="year">Per Tahun</option>
+                    </select>
+
+                    <div id="filter-input-container" class="flex items-center">
+                        <input type="month" id="month-filter" onchange="handleFilterChange()" class="rounded-lg border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1.5 px-3 text-sm font-semibold text-slate-700 bg-white cursor-pointer">
+                        <select id="year-filter" onchange="handleFilterChange()" class="hidden rounded-lg border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1.5 px-3 text-sm font-semibold text-slate-700 bg-white cursor-pointer">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 font-semibold mb-1" data-i18n="statTotalDowntime">Total Downtime</p>
+                        <p class="text-3xl font-bold text-slate-800" id="stat-downtime">0j 0m</p>
+                    </div>
+                    <div class="bg-indigo-50 p-3.5 rounded-xl text-indigo-600">
+                        <i data-lucide="clock" class="w-7 h-7"></i>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 font-semibold mb-1" data-i18n="statOpenIssues">Open Issues</p>
+                        <p class="text-3xl font-bold text-amber-500" id="stat-open">0</p>
+                    </div>
+                    <div class="bg-amber-50 p-3.5 rounded-xl text-amber-500">
+                        <i data-lucide="alert-triangle" class="w-7 h-7"></i>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 font-semibold mb-1" data-i18n="statTotalIncidents">Total Insiden</p>
+                        <p class="text-3xl font-bold text-emerald-500" id="stat-incidents">0</p>
+                    </div>
+                    <div class="bg-emerald-50 p-3.5 rounded-xl text-emerald-500">
+                        <i data-lucide="activity" class="w-7 h-7"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <span class="w-1.5 h-5 bg-indigo-500 rounded-full mr-2"></span>
+                        <span data-i18n="chartReason">Downtime per Kategori Masalah (Menit)</span>
+                    </h3>
+                    <div class="relative h-72 w-full">
+                        <canvas id="reasonChart"></canvas>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <span class="w-1.5 h-5 bg-blue-500 rounded-full mr-2"></span>
+                        <span data-i18n="chartMolding">Downtime per Mesin Molding (Menit)</span>
+                    </h3>
+                    <div class="relative h-72 w-full">
+                        <canvas id="machineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horizontal Bar Charts (Top 5 & Models) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <!-- Top Problems Summary -->
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-rose-500 mr-2"></i>
+                        <span data-i18n="topProblemsTitle">Summary Masalah Paling Sering Terjadi (Top 5)</span>
+                    </h3>
+                    <!-- Ketinggian telah diperkecil ke h-48 -->
+                    <div class="relative h-48 w-full" id="topProblemsContainer">
+                        <canvas id="topProblemsChart"></canvas>
+                    </div>
+                    <div id="topProblemsEmpty" class="hidden py-8 text-center text-sm text-slate-500 italic">
+                        Belum ada data masalah untuk dirangkum.
+                    </div>
+                </div>
+
+                <!-- Top Model & Parts Summary -->
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <i data-lucide="box" class="w-5 h-5 text-indigo-500 mr-2"></i>
+                        <span data-i18n="chartModelPart">Top Model & Part Paling Sering Bermasalah</span>
+                    </h3>
+                    <div class="relative h-48 w-full" id="modelPartContainer">
+                        <canvas id="modelPartChart"></canvas>
+                    </div>
+                    <div id="modelPartEmpty" class="hidden py-8 text-center text-sm text-slate-500 italic">
+                        Belum ada data model & part untuk dirangkum.
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- VIEW: INPUT / EDIT RECORD -->
+        <div id="view-record" class="hidden fade-in glass-panel p-8 rounded-2xl shadow-sm border border-slate-200 max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center pb-4 border-b border-slate-100" id="form-header-title">
+                <i data-lucide="plus-square" class="text-indigo-600 mr-3 w-6 h-6"></i>
+                <span data-i18n="formTitle">Input Down Time & Corrective Action</span>
+            </h2>
+            <form id="record-form" class="space-y-6">
+                
+                <!-- Baris 1: Tanggal, Mesin, Operator -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formDate">Tanggal</label>
+                        <input type="date" id="f-date" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formMachine">Mesin Molding</label>
+                        <select id="f-machine" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm bg-white">
+                            <option value="">-- Pilih Mesin --</option>
+                            <option value="M/C 01">M/C 01 (2500 TON)</option>
+                            <option value="M/C 02">M/C 02 (1300 TON)</option>
+                            <option value="M/C 03">M/C 03 (550 TON)</option>
+                            <option value="M/C 04">M/C 04 (850 TON)</option>
+                            <option value="M/C 05">M/C 05 (650 TON)</option>
+                            <option value="M/C 06">M/C 06 (450 TON)</option>
+                            <option value="M/C 07">M/C 07 (350 TON)</option>
+                            <option value="M/C 08">M/C 08 (220 TON)</option>
+                            <option value="M/C 09">M/C 09 (450 TON)</option>
+                            <option value="M/C 10">M/C 10 (350 TON)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formOperator">Operator</label>
+                        <input type="text" id="f-operator" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm">
+                    </div>
+                </div>
+
+                <!-- Baris 2: Nama Model & Nama Mold/Part -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formModelName">Nama Model</label>
+                        <input type="text" id="f-model-name" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm" placeholder="Contoh: HR-V, Brio, dsb.">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formMoldName">Nama Mold / Part</label>
+                        <input type="text" id="f-mold-name" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm" placeholder="Contoh: Cover L/R, Bumper">
+                    </div>
+                </div>
+
+                <!-- Baris 3: Waktu, Durasi, Kategori -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formStart">Mulai Stop</label>
+                        <input type="time" id="f-start" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formEnd">Selesai</label>
+                        <input type="time" id="f-end" class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formDuration">Durasi (Menit)</label>
+                        <input type="text" id="f-duration" readonly class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-500 shadow-sm p-2.5 border text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formReason">Kategori Masalah</label>
+                        <select id="f-reason" required class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm bg-white">
+                            <option value="">-- Pilih --</option>
+                            <option value="Ejector Macet / Patah">Ejector Macet / Patah</option>
+                            <option value="Cooling System Bocor / Mampet">Cooling System Bocor / Mampet</option>
+                            <option value="Scratch / Baret Cavity">Scratch / Baret Cavity</option>
+                            <option value="Heater / Thermocouple Error">Heater / Thermocouple Error</option>
+                            <option value="Mold Flash / Burry">Mold Flash / Burry</option>
+                            <option value="Pin / Insert Patah">Pin / Insert Patah</option>
+                            <option value="Hot Runner Mampet / Bocor">Hot Runner Mampet / Bocor</option>
+                            <option value="Setting / Naik Turun Mold">Setting / Naik Turun Mold</option>
+                            <option value="Limit Switch Error">Limit Switch Error</option>
+                            <option value="Hydraulic System Error">Hydraulic System Error</option>
+                            <option value="Lain-lain">Lain-lain</option>
+                        </select>
+                        <div id="f-reason-other-container" class="hidden mt-2 fade-in">
+                            <input type="text" id="f-reason-other" placeholder="Sebutkan masalah spesifik..." class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formDesc">Deskripsi Masalah (Detail)</label>
+                    <textarea id="f-desc" required rows="2" class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border text-sm"></textarea>
+                </div>
+                
+                <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100 space-y-4">
+                    <h3 class="text-sm font-bold text-indigo-800 flex items-center">
+                        <i data-lucide="wrench" class="w-4 h-4 mr-2"></i>
+                        <span data-i18n="formCorrective">Corrective Action (Tindakan Perbaikan)</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formTech">Teknisi / PIC</label>
+                            <input type="text" id="f-tech" class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formStatus">Status</label>
+                            <select id="f-status" class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 border text-sm bg-white">
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1" data-i18n="formAction">Tindakan yang dilakukan</label>
+                        <textarea id="f-action" rows="2" class="w-full rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border text-sm"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-2 space-x-3">
+                    <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-6 rounded-xl transition-colors shadow-sm">
+                        <span data-i18n="btnCancel">Batal</span>
+                    </button>
+                    <button type="submit" id="btn-submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl flex items-center transition-colors shadow-md shadow-indigo-200">
+                        <i data-lucide="save" class="w-4 h-4 mr-2" id="icon-submit"></i> <span id="text-submit" data-i18n="btnSave">Simpan Record</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- VIEW: HISTORY -->
+        <div id="view-history" class="hidden fade-in glass-panel p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center">
+                    <i data-lucide="database" class="text-indigo-600 mr-2 w-5 h-5"></i>
+                    <span data-i18n="navHistory">History List</span>
+                </h2>
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <i data-lucide="search" class="absolute left-3 top-2 w-4 h-4 text-slate-400"></i>
+                        <input type="text" id="search-input" onkeyup="handleFilterChange()" placeholder="Cari data..." class="w-full rounded-full border-slate-200 shadow-sm py-1.5 pl-9 pr-4 text-sm border focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <button onclick="exportToPDF()" class="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 px-3 rounded-full flex items-center text-sm font-semibold transition-colors shadow-sm whitespace-nowrap">
+                        <i data-lucide="download" class="w-4 h-4 mr-1"></i> PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase" data-i18n="colDate">Waktu</th>
+                            <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase" data-i18n="colMachine">Mesin</th>
+                            <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase" data-i18n="colReason">Masalah</th>
+                            <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase" data-i18n="colDuration">Durasi</th>
+                            <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase" data-i18n="colStatus">Status</th>
+                            <th class="px-5 py-3 text-right text-xs font-bold text-slate-500 uppercase">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="bg-white divide-y divide-slate-100">
+                        <!-- Data rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /* ================= CORE LOGIC ================= */
+        
+        let records = [];
+        let isAuthenticated = false;
+        let currentLang = 'id';
+        
+        // Chart Instances
+        let reasonChartInstance = null;
+        let machineChartInstance = null;
+        let topProblemsChartInstance = null; 
+        let modelPartChartInstance = null; 
+        
+        // Variabel pelacak status edit
+        let editingId = null;
+
+        // Memuat data dari local storage saat aplikasi dimulai
+        const savedRecords = localStorage.getItem('moldingRecords');
+        if (savedRecords) {
+            try {
+                records = JSON.parse(savedRecords);
+            } catch (e) {
+                console.error("Gagal memuat data dari Local Storage", e);
+            }
+        }
+
+        // Palet warna kontras tinggi 
+        const pColors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabed4', '#469990', '#dcbeff', '#9A6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#a9a9a9'];
+        let categoryColorMap = {};
+        
+        // Helper untuk menghasilkan dan melacak warna agar konsisten antar chart
+        function getColorForCategory(category) {
+            if (!category) return '#94a3b8'; // default
+            if (!categoryColorMap[category]) {
+                const nextColorIndex = Object.keys(categoryColorMap).length % pColors.length;
+                categoryColorMap[category] = pColors[nextColorIndex];
+            }
+            return categoryColorMap[category];
+        }
+        
+        const MACHINE_KEYS = ['M/C 01', 'M/C 02', 'M/C 03', 'M/C 04', 'M/C 05', 'M/C 06', 'M/C 07', 'M/C 08', 'M/C 09', 'M/C 10'];
+
+        const dict = {
+            id: {
+                navDashboard: "Dashboard", navInput: "Input Record", navHistory: "History List",
+                dashTitle: "Dashboard Performance", filterPeriod: "Periode Filter:",
+                statTotalDowntime: "Total Downtime", statOpenIssues: "Open Issues", statTotalIncidents: "Total Insiden",
+                chartReason: "Downtime per Kategori Masalah (Menit)", chartMolding: "Downtime per Mesin Molding (Menit)",
+                topProblemsTitle: "Summary Masalah Paling Sering Terjadi (Top 5)",
+                chartModelPart: "Top Model & Part Paling Sering Bermasalah",
+                formTitle: "Input Down Time & Corrective Action", formTitleEdit: "Edit Down Time Record", formDate: "Tanggal", formMachine: "Mesin Molding", formModelName: "Nama Model", formMoldName: "Nama Mold / Part", formOperator: "Operator",
+                formStart: "Mulai Stop", formEnd: "Selesai", formDuration: "Durasi (Menit)", formReason: "Kategori Masalah",
+                formDesc: "Deskripsi Masalah (Detail)", formCorrective: "Corrective Action (Tindakan Perbaikan)", formTech: "Teknisi / PIC",
+                formStatus: "Status", formAction: "Tindakan yang dilakukan", btnSave: "Simpan Record", btnUpdate: "Update Record", btnCancel: "Batal",
+                colDate: "Waktu", colMachine: "Mesin", colDuration: "Durasi", colStatus: "Status"
+            },
+            en: {
+                navDashboard: "Dashboard", navInput: "Input Record", navHistory: "History List",
+                dashTitle: "Performance Dashboard", filterPeriod: "Filter Period:",
+                statTotalDowntime: "Total Downtime", statOpenIssues: "Open Issues", statTotalIncidents: "Total Incidents",
+                chartReason: "Downtime by Problem Category (Min)", chartMolding: "Downtime by Molding Machine (Min)",
+                topProblemsTitle: "Most Frequent Problems Summary (Top 5)",
+                chartModelPart: "Top Problematic Model & Parts",
+                formTitle: "Input Down Time & Corrective Action", formTitleEdit: "Edit Down Time Record", formDate: "Date", formMachine: "Molding Machine", formModelName: "Model Name", formMoldName: "Mold / Part Name", formOperator: "Operator",
+                formStart: "Stop Start", formEnd: "Finish", formDuration: "Duration (Min)", formReason: "Problem Category",
+                formDesc: "Problem Description (Detail)", formCorrective: "Corrective Action", formTech: "Technician / PIC",
+                formStatus: "Status", formAction: "Action Taken", btnSave: "Save Record", btnUpdate: "Update Record", btnCancel: "Cancel",
+                colDate: "Time", colMachine: "Machine", colDuration: "Duration", colStatus: "Status"
+            },
+            jp: {
+                navDashboard: "ダッシュボード", navInput: "入力記録", navHistory: "履歴リスト",
+                dashTitle: "パフォーマンスダッシュボード", filterPeriod: "フィルター期間:",
+                statTotalDowntime: "総ダウンタイム", statOpenIssues: "未解決の問題", statTotalIncidents: "総インシデント",
+                chartReason: "問題カテゴリ別ダウンタイム (分)", chartMolding: "成形機別ダウンタイム (分)",
+                topProblemsTitle: "最も頻繁な問題の要約 (トップ 5)",
+                chartModelPart: "最も問題の多いモデルと部品",
+                formTitle: "ダウンタイムと是正措置の入力", formTitleEdit: "ダウンタイム記録の編集", formDate: "日付", formMachine: "成形機", formModelName: "モデル名", formMoldName: "金型/部品名", formOperator: "オペレーター",
+                formStart: "停止開始", formEnd: "終了", formDuration: "期間 (分)", formReason: "問題カテゴリ",
+                formDesc: "問題の説明 (詳細)", formCorrective: "是正措置", formTech: "技術者 / PIC",
+                formStatus: "ステータス", formAction: "実行されたアクション", btnSave: "レコードを保存", btnUpdate: "レコードを更新", btnCancel: "キャンセル",
+                colDate: "時間", colMachine: "機械", colDuration: "期間", colStatus: "ステータス"
+            }
+        };
+
+        let isDarkMode = localStorage.getItem('theme') === 'dark';
+        
+        function initTheme() {
+            if (isDarkMode || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                isDarkMode = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                isDarkMode = false;
+            }
+            updateThemeIcon();
+        }
+        
+        window.toggleTheme = function() {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+            updateThemeIcon();
+            if(isAuthenticated) renderCharts(); 
+        };
+
+        function updateThemeIcon() {
+            const icon = document.getElementById('theme-icon');
+            if(icon) {
+                icon.setAttribute('data-lucide', isDarkMode ? 'sun' : 'moon');
+                try { if (window.lucide) lucide.createIcons(); } catch(e){}
+            }
+        }
+        
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+            
+            if (u === 'moldmaintenance' && p === 'moldmtc') {
+                isAuthenticated = true;
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('app-header').classList.remove('hidden');
+                document.getElementById('app-main').classList.remove('hidden');
+                
+                showToast('Berhasil Login ke Sistem!');
+                
+                if (records.length === 0 && !localStorage.getItem('moldingRecords')) {
+                     generateDummyData();
+                     localStorage.setItem('moldingRecords', JSON.stringify(records));
+                }
+
+                populateYears(); // Bangun dropdown tahun
+                
+                setTimeout(() => { 
+                    updateDashboard();
+                    renderCharts(); 
+                }, 150);
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        window.logout = function() {
+            isAuthenticated = false;
+            document.getElementById('view-login').classList.remove('hidden');
+            document.getElementById('app-header').classList.add('hidden');
+            document.getElementById('app-main').classList.add('hidden');
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').classList.add('hidden');
+            
+            if (window.lucide) lucide.createIcons();
+            showToast('Anda telah Logout.');
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('translate-x-full', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-x-full', 'opacity-0'), 3000);
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[lang][key]) el.textContent = dict[lang][key];
+            });
+            // Update mode teks statik juga jika perlu
+            if(editingId) {
+                document.getElementById('text-submit').textContent = dict[currentLang]['btnUpdate'];
+            }
+            updateDashboard(document.getElementById('search-input').value); 
+            renderCharts(); 
+        }
+
+        function switchTab(tabId) {
+            ['dashboard', 'record', 'history'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).className = "flex items-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/50";
+            });
+
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).className = "flex items-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all bg-white shadow-sm text-indigo-600";
+
+            if (tabId === 'dashboard') {
+                updateDashboard(document.getElementById('search-input').value);
+                renderCharts();
+            }
+        }
+
+        function populateYears() {
+            const yearSelect = document.getElementById('year-filter');
+            yearSelect.innerHTML = '';
+            const currentYear = new Date().getFullYear();
+            let years = new Set();
+            
+            // Tambahkan 5 tahun ke belakang dan 1 tahun ke depan
+            for(let i = currentYear - 5; i <= currentYear + 1; i++) {
+                years.add(i.toString());
+            }
+            // Pastikan tahun di records juga ada
+            records.forEach(r => {
+                if(r.date) years.add(r.date.substring(0,4));
+            });
+
+            // Urutkan menurun
+            Array.from(years).sort((a,b) => b - a).forEach(y => {
+                let opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                if(y === currentYear.toString()) opt.selected = true;
+                yearSelect.appendChild(opt);
+            });
+        }
+
+        window.toggleFilterMode = function() {
+            const mode = document.getElementById('filter-mode').value;
+            const mFilter = document.getElementById('month-filter');
+            const yFilter = document.getElementById('year-filter');
+            
+            if (mode === 'all') {
+                mFilter.classList.add('hidden');
+                yFilter.classList.add('hidden');
+            } else if (mode === 'month') {
+                mFilter.classList.remove('hidden');
+                yFilter.classList.add('hidden');
+            } else if (mode === 'year') {
+                mFilter.classList.add('hidden');
+                yFilter.classList.remove('hidden');
+            }
+            handleFilterChange();
+        };
+
+        window.handleFilterChange = function() {
+            updateDashboard(document.getElementById('search-input').value);
+            renderCharts();
+        };
+
+        function getFilteredRecords(searchTerm = '') {
+            const mode = document.getElementById('filter-mode').value;
+            let filterVal = '';
+            
+            if(mode === 'month') filterVal = document.getElementById('month-filter').value;
+            if(mode === 'year') filterVal = document.getElementById('year-filter').value;
+
+            return records.filter(r => {
+                let matchPeriod = true;
+                if (mode !== 'all' && filterVal) {
+                    matchPeriod = (r.date && r.date.startsWith(filterVal));
+                }
+                
+                const searchStr = `${r.machine} ${r.modelName || ''} ${r.moldName || ''} ${r.reason} ${r.desc} ${r.operator}`.toLowerCase();
+                const matchSearch = searchTerm ? searchStr.includes(searchTerm.toLowerCase()) : true;
+                
+                return matchPeriod && matchSearch;
+            });
+        }
+
+        function calcDuration(start, end) {
+            if (!start || !end) return null;
+            const [h1, m1] = start.split(':').map(Number);
+            const [h2, m2] = end.split(':').map(Number);
+            let d1 = new Date(2000, 0, 1, h1, m1);
+            let d2 = new Date(2000, 0, 1, h2, m2);
+            if (d2 < d1) d2.setDate(d2.getDate() + 1);
+            return Math.round((d2 - d1) / 60000);
+        }
+
+        document.getElementById('f-start').addEventListener('change', updateDurationField);
+        document.getElementById('f-end').addEventListener('change', updateDurationField);
+        function updateDurationField() {
+            const s = document.getElementById('f-start').value;
+            const e = document.getElementById('f-end').value;
+            const d = calcDuration(s, e);
+            document.getElementById('f-duration').value = d !== null ? d : '';
+        }
+
+        document.getElementById('f-reason').addEventListener('change', function(e) {
+            const otherContainer = document.getElementById('f-reason-other-container');
+            const otherInput = document.getElementById('f-reason-other');
+            if (e.target.value === 'Lain-lain') {
+                otherContainer.classList.remove('hidden');
+                otherInput.required = true;
+            } else {
+                otherContainer.classList.add('hidden');
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        });
+
+        document.getElementById('record-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let finalReason = document.getElementById('f-reason').value;
+            if (finalReason === 'Lain-lain') {
+                finalReason = document.getElementById('f-reason-other').value;
+            }
+            const inputDate = document.getElementById('f-date').value;
+            
+            if (editingId) {
+                // UPDATE RECORD
+                const index = records.findIndex(r => r.id === editingId);
+                if (index !== -1) {
+                    records[index] = {
+                        ...records[index],
+                        date: inputDate,
+                        machine: document.getElementById('f-machine').value,
+                        modelName: document.getElementById('f-model-name').value,
+                        moldName: document.getElementById('f-mold-name').value,
+                        operator: document.getElementById('f-operator').value,
+                        start: document.getElementById('f-start').value,
+                        end: document.getElementById('f-end').value,
+                        duration: calcDuration(document.getElementById('f-start').value, document.getElementById('f-end').value),
+                        reason: finalReason,
+                        desc: document.getElementById('f-desc').value,
+                        tech: document.getElementById('f-tech').value,
+                        status: document.getElementById('f-status').value,
+                        action: document.getElementById('f-action').value
+                    };
+                    showToast('Data berhasil di-update!');
+                }
+            } else {
+                // CREATE NEW RECORD
+                const newRecord = {
+                    id: Date.now(),
+                    date: inputDate,
+                    machine: document.getElementById('f-machine').value,
+                    modelName: document.getElementById('f-model-name').value,
+                    moldName: document.getElementById('f-mold-name').value,
+                    operator: document.getElementById('f-operator').value,
+                    start: document.getElementById('f-start').value,
+                    end: document.getElementById('f-end').value,
+                    duration: calcDuration(document.getElementById('f-start').value, document.getElementById('f-end').value),
+                    reason: finalReason,
+                    desc: document.getElementById('f-desc').value,
+                    tech: document.getElementById('f-tech').value,
+                    status: document.getElementById('f-status').value,
+                    action: document.getElementById('f-action').value
+                };
+                records.unshift(newRecord); 
+                showToast('Data berhasil disimpan!');
+            }
+            
+            localStorage.setItem('moldingRecords', JSON.stringify(records));
+            
+            // Setel filter ke tanggal input
+            if (inputDate) {
+                document.getElementById('filter-mode').value = 'month';
+                toggleFilterMode();
+                document.getElementById('month-filter').value = inputDate.slice(0, 7); 
+            }
+
+            resetForm(); // Bersihkan form
+            updateDashboard(document.getElementById('search-input').value);
+            switchTab('history');
+        });
+
+        window.editRecord = function(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+
+            editingId = id; // Set global flag
+
+            // Isi form
+            document.getElementById('f-date').value = record.date;
+            document.getElementById('f-machine').value = record.machine;
+            document.getElementById('f-model-name').value = record.modelName || '';
+            document.getElementById('f-mold-name').value = record.moldName || '';
+            document.getElementById('f-operator').value = record.operator;
+            document.getElementById('f-start').value = record.start;
+            document.getElementById('f-end').value = record.end || '';
+            document.getElementById('f-duration').value = record.duration || '';
+            document.getElementById('f-desc').value = record.desc;
+            document.getElementById('f-tech').value = record.tech || '';
+            document.getElementById('f-status').value = record.status;
+            document.getElementById('f-action').value = record.action || '';
+
+            // Handle reason "Lain-lain"
+            const selectReason = document.getElementById('f-reason');
+            const opts = Array.from(selectReason.options).map(o => o.value);
+            const otherContainer = document.getElementById('f-reason-other-container');
+            const otherInput = document.getElementById('f-reason-other');
+
+            if (opts.includes(record.reason)) {
+                selectReason.value = record.reason;
+                otherContainer.classList.add('hidden');
+                otherInput.value = '';
+                otherInput.required = false;
+            } else {
+                selectReason.value = 'Lain-lain';
+                otherContainer.classList.remove('hidden');
+                otherInput.value = record.reason;
+                otherInput.required = true;
+            }
+
+            // Ubah antarmuka (UI) Form
+            document.getElementById('form-header-title').innerHTML = `
+                <i data-lucide="edit-3" class="text-indigo-600 mr-3 w-6 h-6"></i>
+                <span data-i18n="formTitleEdit">${dict[currentLang]['formTitleEdit'] || 'Edit Down Time Record'}</span>
+            `;
+            document.getElementById('icon-submit').setAttribute('data-lucide', 'check-circle');
+            document.getElementById('text-submit').textContent = dict[currentLang]['btnUpdate'] || 'Update Record';
+            document.getElementById('btn-cancel').classList.remove('hidden');
+            
+            try { if (window.lucide) lucide.createIcons(); } catch(e) {}
+            
+            switchTab('record');
+        };
+
+        window.resetForm = function() {
+            editingId = null;
+            document.getElementById('record-form').reset();
+            document.getElementById('f-reason-other-container').classList.add('hidden');
+            document.getElementById('f-reason-other').required = false;
+
+            // Kembalikan UI seperti semula
+            document.getElementById('form-header-title').innerHTML = `
+                <i data-lucide="plus-square" class="text-indigo-600 mr-3 w-6 h-6"></i>
+                <span data-i18n="formTitle">${dict[currentLang]['formTitle'] || 'Input Down Time & Corrective Action'}</span>
+            `;
+            document.getElementById('icon-submit').setAttribute('data-lucide', 'save');
+            document.getElementById('text-submit').textContent = dict[currentLang]['btnSave'] || 'Simpan Record';
+            document.getElementById('btn-cancel').classList.add('hidden');
+
+            try { if (window.lucide) lucide.createIcons(); } catch(e) {}
+        };
+
+        window.deleteRecord = function(id) {
+            if(confirm('Hapus data ini secara permanen?')) {
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem('moldingRecords', JSON.stringify(records));
+                updateDashboard(document.getElementById('search-input').value);
+                renderCharts();
+            }
+        };
+
+        function updateDashboard(searchTerm = '') {
+            const dashFiltered = getFilteredRecords(searchTerm);
+            
+            // Rekap Statistik Top
+            let totalMins = 0;
+            let openCnt = 0;
+            dashFiltered.forEach(r => {
+                if (r.duration) totalMins += r.duration;
+                if (r.status === 'Open' || r.status === 'In Progress') openCnt++;
+            });
+            document.getElementById('stat-downtime').textContent = `${Math.floor(totalMins/60)}j ${totalMins%60}m`;
+            document.getElementById('stat-open').textContent = openCnt;
+            document.getElementById('stat-incidents').textContent = dashFiltered.length;
+
+            // Tabel History List
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (dashFiltered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-8 text-center text-slate-500 italic font-medium">Tidak ada data ditemukan.</td></tr>`;
+            } else {
+                dashFiltered.forEach(r => {
+                    const durHtml = r.duration 
+                        ? `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-100 text-slate-700 border border-slate-200">${r.duration} mnt</span>`
+                        : `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-700 animate-pulse">Running...</span>`;
+                    
+                    let statColor = 'bg-slate-100 text-slate-700';
+                    if(r.status === 'Closed' || r.status === 'Resolved') statColor = 'bg-emerald-100 text-emerald-700';
+                    if(r.status === 'Open') statColor = 'bg-red-100 text-red-700';
+                    if(r.status === 'In Progress') statColor = 'bg-blue-100 text-blue-700';
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors group";
+                    tr.innerHTML = `
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-slate-800">${r.date}</div>
+                            <div class="text-xs text-slate-500">${r.start} - ${r.end || '??'}</div>
+                        </td>
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-indigo-700">${r.machine}</div>
+                            <div class="text-xs text-slate-500 font-medium">Mod: ${r.modelName || '-'} | Mld: ${r.moldName || '-'}</div>
+                            <div class="text-xs text-slate-500">Op: ${r.operator}</div>
+                        </td>
+                        <td class="px-5 py-4">
+                            <div class="text-sm font-semibold text-slate-800">${r.reason}</div>
+                            <div class="text-xs text-slate-500 truncate max-w-[200px]" title="${r.desc}">${r.desc}</div>
+                        </td>
+                        <td class="px-5 py-4 whitespace-nowrap">${durHtml}</td>
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <span class="px-2.5 py-1 inline-flex text-xs font-bold rounded-full ${statColor}">${r.status}</span>
+                        </td>
+                        <td class="px-5 py-4 whitespace-nowrap text-right space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                            <button onclick="editRecord(${r.id})" class="text-blue-500 hover:text-blue-700 p-1.5 rounded-lg hover:bg-blue-50 transition-colors" title="Edit Data">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteRecord(${r.id})" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Hapus Data">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            try { if (window.lucide) lucide.createIcons(); } catch(e) {}
+        }
+
+        function renderCharts() {
+            const dash = document.getElementById('view-dashboard');
+            if (dash.classList.contains('hidden')) return;
+            if (typeof Chart === 'undefined') return;
+
+            // Destroy previous charts if exist
+            if(reasonChartInstance) reasonChartInstance.destroy();
+            if(machineChartInstance) machineChartInstance.destroy();
+            if(topProblemsChartInstance) topProblemsChartInstance.destroy();
+            if(modelPartChartInstance) modelPartChartInstance.destroy();
+
+            const chartData = getFilteredRecords();
+            const reasonMap = {};
+            
+            // Generate Warna Konsisten & Kumpulkan Data
+            chartData.forEach(r => {
+                if(r.duration && r.reason) {
+                    reasonMap[r.reason] = (reasonMap[r.reason] || 0) + r.duration;
+                    getColorForCategory(r.reason); // Assign color
+                }
+            });
+
+            const isDark = document.documentElement.classList.contains('dark');
+            Chart.defaults.color = isDark ? '#94a3b8' : '#64748b';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            const tooltipBg = isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(15, 23, 42, 0.9)';
+            const gridColor = isDark ? '#334155' : '#e2e8f0';
+            const textColor = isDark ? '#e2e8f0' : '#334155';
+
+            // ================= CHART 1: DONUT =================
+            let dLabels = Object.keys(reasonMap);
+            let dData = Object.values(reasonMap);
+            let dColors = dLabels.map(label => getColorForCategory(label));
+            
+            if (dLabels.length === 0) { dLabels = ['Belum ada data']; dData = [1]; dColors = ['#e2e8f0']; }
+
+            reasonChartInstance = new Chart(document.getElementById('reasonChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: dLabels,
+                    datasets: [{ data: dData, backgroundColor: dColors, borderWidth: 2, borderColor: isDark ? '#1e293b' : '#ffffff', hoverOffset: dLabels[0] === 'Belum ada data' ? 0 : 5 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '65%',
+                    plugins: {
+                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10, font: {size: 11} } },
+                        tooltip: { backgroundColor: tooltipBg, padding: 12, cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    if(context.label === 'Belum ada data') return ' Belum ada data';
+                                    return ' ' + context.label + ': ' + context.raw + ' mnt';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ================= CHART 2: STACKED BAR =================
+            const stackedData = {};
+            MACHINE_KEYS.forEach(m => stackedData[m] = {});
+
+            chartData.forEach(r => {
+                if(r.duration && r.machine && r.reason) {
+                    const mKey = r.machine.substring(0, 6);
+                    if(stackedData[mKey]) stackedData[mKey][r.reason] = (stackedData[mKey][r.reason] || 0) + r.duration;
+                }
+            });
+
+            const uniqueReasons = Object.keys(reasonMap);
+            const datasets = [];
+
+            if (uniqueReasons.length === 0) {
+                 datasets.push({ label: 'Belum ada data', data: MACHINE_KEYS.map(() => 0), backgroundColor: '#e2e8f0' });
+            } else {
+                uniqueReasons.forEach(reason => {
+                    const dataPoints = MACHINE_KEYS.map(machine => stackedData[machine][reason] || 0);
+                    datasets.push({ label: reason, data: dataPoints, backgroundColor: getColorForCategory(reason), borderRadius: 4, barPercentage: 0.6 });
+                });
+            }
+
+            machineChartInstance = new Chart(document.getElementById('machineChart'), {
+                type: 'bar',
+                data: { labels: MACHINE_KEYS, datasets: datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            backgroundColor: tooltipBg, padding: 12, cornerRadius: 8, mode: 'index', intersect: false,
+                            callbacks: {
+                                title: (items) => items[0].label,
+                                label: function(context) {
+                                    if(context.raw === 0) return null;
+                                    return ` ${context.dataset.label}: ${context.raw} mnt`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true, grid: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } },
+                        y: { stacked: true, beginAtZero: true, grid: { borderDash: [4, 4], color: gridColor }, title: { display: false, text: 'Minutes' } }
+                    }
+                }
+            });
+
+            // ================= CHART 3: TOP 5 PROBLEMS (HORIZ BAR) =================
+            const tStats = {};
+            chartData.forEach(r => {
+                if(r.duration && r.reason) {
+                    if(!tStats[r.reason]) tStats[r.reason] = { time: 0, count: 0 };
+                    tStats[r.reason].time += r.duration;
+                    tStats[r.reason].count += 1;
+                }
+            });
+
+            const sortedProbs = Object.keys(tStats).map(key => {
+                return { name: key, time: tStats[key].time, count: tStats[key].count };
+            }).sort((a, b) => b.time - a.time).slice(0, 5); // Ambil 5 teratas
+
+            const tContainer = document.getElementById('topProblemsContainer');
+            const tEmpty = document.getElementById('topProblemsEmpty');
+
+            if(sortedProbs.length === 0) {
+                tContainer.classList.add('hidden');
+                tEmpty.classList.remove('hidden');
+            } else {
+                tContainer.classList.remove('hidden');
+                tEmpty.classList.add('hidden');
+                
+                const tLabels = sortedProbs.map(item => item.name);
+                const tTimeData = sortedProbs.map(item => item.time);
+                const tCountData = sortedProbs.map(item => item.count);
+                const tColors = tLabels.map(label => getColorForCategory(label));
+
+                topProblemsChartInstance = new Chart(document.getElementById('topProblemsChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: tLabels,
+                        datasets: [{ label: 'Total Waktu (Menit)', data: tTimeData, backgroundColor: tColors, borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: tooltipBg, padding: 12, cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        const idx = context.dataIndex;
+                                        return ` Waktu: ${context.raw} mnt | Frekuensi: ${tCountData[idx]} kali`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { beginAtZero: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor }, title: { display: true, text: 'Total Waktu (Menit)', color: textColor, font: {size: 11, weight: 'bold'} } },
+                            y: { grid: { display: false }, ticks: { color: textColor, font: { weight: '600' }, callback: function(value) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 25 ? label.substr(0, 25) + '...' : label;
+                            }}}
+                        }
+                    }
+                });
+            }
+
+            // ================= CHART 4: TOP MODEL & PART (HORIZ BAR) =================
+            const mpStats = {};
+            chartData.forEach(r => {
+                if (r.duration) {
+                    const mpKey = (r.modelName || 'N/A') + ' - ' + (r.moldName || 'N/A');
+                    if (!mpStats[mpKey]) mpStats[mpKey] = { time: 0, count: 0 };
+                    mpStats[mpKey].time += r.duration;
+                    mpStats[mpKey].count += 1;
+                }
+            });
+
+            const sortedMP = Object.keys(mpStats).map(key => {
+                return { name: key, time: mpStats[key].time, count: mpStats[key].count };
+            }).sort((a, b) => b.time - a.time).slice(0, 5);
+
+            const mpContainer = document.getElementById('modelPartContainer');
+            const mpEmpty = document.getElementById('modelPartEmpty');
+
+            if (sortedMP.length === 0) {
+                mpContainer.classList.add('hidden');
+                mpEmpty.classList.remove('hidden');
+            } else {
+                mpContainer.classList.remove('hidden');
+                mpEmpty.classList.add('hidden');
+
+                const mpLabels = sortedMP.map(item => item.name);
+                const mpTimeData = sortedMP.map(item => item.time);
+                const mpCountData = sortedMP.map(item => item.count);
+                const mpColors = mpLabels.map(label => getColorForCategory(label)); 
+
+                modelPartChartInstance = new Chart(document.getElementById('modelPartChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: mpLabels,
+                        datasets: [{ label: 'Total Waktu (Menit)', data: mpTimeData, backgroundColor: mpColors, borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: tooltipBg, padding: 12, cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        const idx = context.dataIndex;
+                                        return ` Waktu: ${context.raw} mnt | Frekuensi: ${mpCountData[idx]} kali`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { beginAtZero: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor }, title: { display: true, text: 'Total Waktu (Menit)', color: textColor, font: {size: 11, weight: 'bold'} } },
+                            y: { grid: { display: false }, ticks: { color: textColor, font: { weight: '600' }, callback: function(value) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 25 ? label.substr(0, 25) + '...' : label;
+                            }}}
+                        }
+                    }
+                });
+            }
+        }
+
+        window.exportToPDF = function() {
+            if (typeof window.jspdf === 'undefined') {
+                alert("Library PDF belum selesai dimuat, mohon pastikan internet stabil.");
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            
+            const mode = document.getElementById('filter-mode').value;
+            let periodeTxt = 'Periode: Semua Waktu';
+            if (mode === 'month') periodeTxt = `Periode Bulan: ${document.getElementById('month-filter').value}`;
+            if (mode === 'year') periodeTxt = `Periode Tahun: ${document.getElementById('year-filter').value}`;
+            
+            doc.setFontSize(16);
+            doc.text("MOLDING CONTROL - HISTORY LOG", 14, 15);
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text("Moriroku Technology Indonesia", 14, 21);
+            doc.text(periodeTxt, 14, 26);
+            doc.text("Dicetak pada: " + new Date().toLocaleString(), 14, 31);
+
+            const exportData = getFilteredRecords(document.getElementById('search-input').value).map(r => [
+                r.date, `${r.machine}\n(Mod: ${r.modelName || '-'})\n(Mld: ${r.moldName || '-'})`, r.reason, r.desc, (r.duration || 0) + " min", r.status, r.tech
+            ]);
+
+            doc.autoTable({
+                startY: 37,
+                head: [['Tanggal', 'Mesin', 'Kategori', 'Deskripsi', 'Durasi', 'Status', 'PIC']],
+                body: exportData,
+                theme: 'grid',
+                headStyles: { fillColor: [79, 70, 229] }, 
+                styles: { fontSize: 8, cellPadding: 3 }
+            });
+
+            doc.save(`Molding_Report_${Date.now()}.pdf`);
+        };
+
+        function generateDummyData() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const categories = [
+                "Ejector Macet / Patah", 
+                "Cooling System Bocor / Mampet", 
+                "Scratch / Baret Cavity", 
+                "Heater / Thermocouple Error",
+                "Hot Runner Mampet / Bocor"
+            ];
+            const machines = ["M/C 01 (2500 TON)", "M/C 02 (1300 TON)", "M/C 03 (550 TON)", "M/C 05 (650 TON)", "M/C 08 (220 TON)", "M/C 09 (450 TON)"];
+            const models = ["HR-V", "BR-V", "Brio", "WR-V"];
+            
+            records = [
+                {id: 1, date: todayStr, machine: machines[0], modelName: models[0], moldName: 'Bumper Front', operator: 'Andi', start: '08:00', end: '08:10', duration: 10, reason: categories[0], desc: 'Dummy Data 1', status: 'Closed'},
+                {id: 2, date: todayStr, machine: machines[1], modelName: models[1], moldName: 'Cover Assy', operator: 'Budi', start: '09:00', end: '09:44', duration: 44, reason: categories[1], desc: 'Dummy Data 2', status: 'Closed'},
+                {id: 3, date: todayStr, machine: machines[2], modelName: models[2], moldName: 'Base Lower', operator: 'Citra', start: '10:00', end: '10:59', duration: 59, reason: categories[2], desc: 'Dummy Data 3', status: 'Closed'},
+                {id: 4, date: todayStr, machine: machines[3], modelName: models[3], moldName: 'Garnish R', operator: 'Dani', start: '11:00', end: '11:40', duration: 40, reason: categories[3], desc: 'Dummy Data 4', status: 'Closed'},
+                {id: 5, date: todayStr, machine: machines[4], modelName: models[0], moldName: 'Knob Handle', operator: 'Eko', start: '13:00', end: '14:05', duration: 65, reason: categories[4], desc: 'Dummy Data 5', status: 'Closed'},
+                {id: 6, date: todayStr, machine: machines[5], modelName: models[2], moldName: 'Bracket A', operator: 'Fajar', start: '14:00', end: '16:07', duration: 127, reason: categories[0], desc: 'Dummy Data 6', status: 'Closed'}
+            ];
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme(); 
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('f-date').value = todayStr;
+            document.getElementById('month-filter').value = todayStr.slice(0, 7);
+            
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
